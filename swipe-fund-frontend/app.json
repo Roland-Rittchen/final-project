@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "SwipeFund",
+    "slug": "swipe-fund-daytrading",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/android-chrome-512x512.png",
+    "splash": {
+      "image": "./assets/android/drawable-hdpi/SwipeFundLogo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android/drawable-hdpi/SwipeFundLogo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/android-chrome-192x192.png"
+    }
+  }
+}
