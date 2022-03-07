@@ -1,0 +1,44 @@
+version: '3.4'
+
+services:
+  db:
+    image: swipefund.azurecr.io/postgres
+
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=swifi
+      - POSTGRES_PASSWORD=swifi
+    volumes:
+      - db:/var/lib/postgresql/data
+      #- ./sql/initDb.sql:/docker-entrypoint-initdb.d/initDb.sql
+    networks:
+      - consumer-producer
+  swipefundbackend:
+    image: swipefund.azurecr.io/swipefundbackend
+    domainname: 'swipefund'
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      network: consumer-producer
+    environment:
+      PGHOST: db
+      PGDATABASE: swifi
+      PGUSERNAME: swifi
+      PGPASSWORD: swifi
+    ports:
+      - '4000:4000'
+    #volumes:
+    #  - './:/src'
+    networks:
+      - consumer-producer
+    depends_on:
+      - db
+networks:
+  consumer-producer:
+volumes:
+  db:
+    driver: bridge #azure_file #bridge
+    #driver_opts:
+    #  share_name: swipefund
+    #  storage_account_name: swipefund
