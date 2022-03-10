@@ -2,9 +2,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Props } from '../../util/navigationTypes';
 import { Header } from '../Header';
 
-export default function Login() {
+export default function Login({ navigation }: Props) {
   const { register, handleSubmit, setValue } = useForm();
   const onSubmit = useCallback((formData) => {
     console.log(formData);
@@ -24,7 +25,7 @@ export default function Login() {
   return (
     <View style={styles.container}>
       <StatusBar />
-      <Header />
+      <Header navigation={navigation} />
       <View style={styles.container}>
         <Text>Login:</Text>
         <TextInput
@@ -42,6 +43,11 @@ export default function Login() {
           onChangeText={onChangeField('password')}
         />
         <Button title="Submit" onPress={handleSubmit(onSubmit)} />
+        <Text>Not registered yet? Register here: </Text>
+        <Button
+          title="Register"
+          onPress={() => navigation.navigate('Signup')}
+        />
       </View>
     </View>
   );

@@ -3,7 +3,7 @@ import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Props } from '../../util/navigationTypes';
 import { Header } from '../Header';
 
-export default function User({ navigation }: Props) {
+export default function Daily({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <StatusBar />

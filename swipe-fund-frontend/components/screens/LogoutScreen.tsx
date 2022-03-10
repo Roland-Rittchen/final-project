@@ -3,13 +3,13 @@ import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Props } from '../../util/navigationTypes';
 import { Header } from '../Header';
 
-export default function User({ navigation }: Props) {
+export default function Logout({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <StatusBar />
       <Header navigation={navigation} />
       <View style={styles.container}>
-        <Text>Register:</Text>
+        <Button title="Logout" onPress={() => navigation.navigate('Home')} />
       </View>
     </View>
   );
