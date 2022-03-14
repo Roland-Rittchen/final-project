@@ -1,5 +1,21 @@
 import { gql } from 'apollo-server';
 
+export type User = {
+  id: number;
+  username: String;
+  userlevel: number;
+  password_hash: String;
+  session: Session;
+};
+
+export type Session = {
+  id: number;
+  token: String;
+  expiry_timestamp: string;
+  user: User;
+  userId: number;
+};
+
 export const typeDefs = gql`
   scalar DateTime
 
@@ -27,6 +43,7 @@ export const typeDefs = gql`
   type Query {
     getAllUsers: [User]!
     getUserById(id: Int!): User!
+    getUserByUsername(name: String): User!
     getUserBySessionToken(token: String): User!
     getUserWithPasswordHashByUsername(name: String!): User!
     getValidSessionByToken(token: String): Session!

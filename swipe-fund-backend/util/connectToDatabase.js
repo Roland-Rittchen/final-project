@@ -5,6 +5,19 @@ import postgres from 'postgres';
 config();
 const sql = postgres();
 
+export async function deleteExpiredSessions() {
+  const sessions = await sql`
+    DELETE FROM
+      sessions
+    WHERE
+      expiry_timestamp < NOW()
+    RETURNING *
+  `;
+
+  return sessions;
+}
+
+// QUERIES
 export async function getAllUsers() {
   return await sql`select * from users`;
 }
@@ -18,6 +31,63 @@ export async function getUserById(id) {
   };
 }
 
+export async function getUserBySessionToken(token) {
+  if (!token) return undefined;
+  const [user] = await sql`
+    SELECT
+      users.id,
+      users.username
+    FROM
+      users,
+      sessions
+    WHERE
+      sessions.token = ${token} AND
+      sessions.user_id = users.id AND
+      sessions.expiry_timestamp > now()
+  `;
+  return user;
+}
+
+export async function getValidSessionByToken(token) {
+  if (!token) return undefined;
+  const [session] = await sql`
+    SELECT
+      *
+    FROM
+      sessions
+    WHERE
+      token = ${token} AND
+      expiry_timestamp > now()
+  `;
+
+  await deleteExpiredSessions();
+
+  return session;
+}
+
+export async function getUserByUsername(name) {
+  const [user] = await sql`
+    SELECT id FROM users WHERE username = ${name}
+  `;
+  return user;
+}
+
+export async function getUserWithPasswordHashByUsername(name) {
+  const [user] = await sql`
+    SELECT
+      id,
+      username,
+      password_hash
+    FROM
+      users
+    WHERE
+      username = ${name}
+  `;
+  return user;
+}
+
+// MUTATIONS
+
 export async function createUser(name, level, password) {
   const passwordHash = await bcrypt.hash(password, 12);
   const user = await sql`INSERT INTO users (username, userlevel, password_hash)
@@ -27,4 +97,31 @@ export async function createUser(name, level, password) {
     username: name,
     userlevel: level,
   };
+}
+
+export async function createSession(token, userId) {
+  const [session] = await sql`
+    INSERT INTO sessions
+      (token, user_id)
+    VALUES
+      (${token}, ${userId})
+    RETURNING
+      id,
+      token
+  `;
+
+  await deleteExpiredSessions();
+
+  return session;
+}
+
+export async function deleteSessionByToken(token) {
+  const [session] = await sql`
+    DELETE FROM
+      sessions
+    WHERE
+      token = ${token}
+    RETURNING *
+  `;
+  return session;
 }

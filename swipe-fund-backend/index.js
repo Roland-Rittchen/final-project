@@ -1,4 +1,5 @@
 import { ApolloServer } from 'apollo-server';
+import { verifyCsrfToken } from './util/auth';
 import { createCsrfToken } from './util/auth.js';
 import {
   createUser,
@@ -6,6 +7,8 @@ import {
   getUserById,
 } from './util/connectToDatabase.js';
 import { typeDefs } from './util/gqlTypedefs.js';
+
+const csrfTokenMatches = verifyCsrfToken(request.body.csrfToken);
 
 // Resolvers define the technique for fetching the types defined in the
 // schema. This resolver retrieves books from the "books" array above.
