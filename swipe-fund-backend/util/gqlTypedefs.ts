@@ -38,6 +38,7 @@ export const typeDefs = gql`
   type AuthPayload {
     token: String
     user: User
+    error: String
   }
 
   type Query {
@@ -47,13 +48,14 @@ export const typeDefs = gql`
     getUserBySessionToken(token: String): User!
     getUserWithPasswordHashByUsername(name: String!): User!
     getValidSessionByToken(token: String): Session!
+    getAllSessions: [Session]!
   }
 
   type Mutation {
     createUser(name: String!, level: Int!, password: String!): AuthPayload
     createSession(token: String!, userId: Int!): Session!
     deleteExpiredSessions: Session!
-    deleteSessionByToken(token: String): Session!
+    deleteSessionByToken(token: String): Session
     login(email: String!, password: String!): AuthPayload
   }
 `;

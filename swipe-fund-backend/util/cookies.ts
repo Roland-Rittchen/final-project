@@ -1,4 +1,3 @@
-import CookieManager from '@react-native-cookies/cookies';
 import { serialize } from 'cookie';
 import Cookies from 'js-cookie';
 

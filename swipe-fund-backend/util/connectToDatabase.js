@@ -22,6 +22,10 @@ export async function getAllUsers() {
   return await sql`select * from users`;
 }
 
+export async function getAllSessions() {
+  return await sql`select * from sessions`;
+}
+
 export async function getUserById(id) {
   const resp = await sql`select * from users WHERE id = ${id}`;
   return {
