@@ -19,15 +19,15 @@ export async function deleteExpiredSessions() {
 
 // QUERIES
 export async function getAllUsers() {
-  return await sql`select * from users`;
+  return await sql`SELECT * FROM users;`;
 }
 
 export async function getAllSessions() {
-  return await sql`select * from sessions`;
+  return await sql`SELECT * FROM sessions;`;
 }
 
 export async function getUserById(id) {
-  const resp = await sql`select * from users WHERE id = ${id}`;
+  const resp = await sql`select * from users WHERE id = ${id};`;
   return {
     id: resp[0].id,
     username: resp[0].username,
@@ -47,7 +47,7 @@ export async function getUserBySessionToken(token) {
     WHERE
       sessions.token = ${token} AND
       sessions.user_id = users.id AND
-      sessions.expiry_timestamp > now()
+      sessions.expiry_timestamp > now();
   `;
   return user;
 }
@@ -61,7 +61,7 @@ export async function getValidSessionByToken(token) {
       sessions
     WHERE
       token = ${token} AND
-      expiry_timestamp > now()
+      expiry_timestamp > now();
   `;
 
   await deleteExpiredSessions();
@@ -71,7 +71,7 @@ export async function getValidSessionByToken(token) {
 
 export async function getUserByUsername(name) {
   const [user] = await sql`
-    SELECT id FROM users WHERE username = ${name}
+    SELECT id FROM users WHERE username = ${name};
   `;
   return user;
 }
@@ -85,7 +85,7 @@ export async function getUserWithPasswordHashByUsername(name) {
     FROM
       users
     WHERE
-      username = ${name}
+      username = ${name};
   `;
   return user;
 }
@@ -111,7 +111,7 @@ export async function createSession(token, userId) {
       (${token}, ${userId})
     RETURNING
       id,
-      token
+      token;
   `;
 
   await deleteExpiredSessions();
@@ -125,7 +125,17 @@ export async function deleteSessionByToken(token) {
       sessions
     WHERE
       token = ${token}
-    RETURNING *
+    RETURNING *;
   `;
   return session;
+}
+
+export async function deleteUser(id) {
+  const user = await sql`
+    DELETE FROM
+      users
+    WHERE
+      id = ${id}
+    RETURNING *; `;
+  return user;
 }

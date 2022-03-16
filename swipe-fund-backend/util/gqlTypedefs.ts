@@ -36,19 +36,18 @@ export const typeDefs = gql`
   }
 
   type AuthPayload {
-    token: String
     user: User
     error: String
   }
 
   type Query {
     getAllUsers: [User]!
+    getAllSessions: [Session]!
     getUserById(id: Int!): User!
     getUserByUsername(name: String): User!
     getUserBySessionToken(token: String): User!
     getUserWithPasswordHashByUsername(name: String!): User!
     getValidSessionByToken(token: String): Session!
-    getAllSessions: [Session]!
   }
 
   type Mutation {
@@ -57,5 +56,6 @@ export const typeDefs = gql`
     deleteExpiredSessions: Session!
     deleteSessionByToken(token: String): Session
     login(email: String!, password: String!): AuthPayload
+    deleteUser(id: Int!): User
   }
 `;

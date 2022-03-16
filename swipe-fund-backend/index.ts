@@ -5,12 +5,11 @@ import { ApolloServer } from 'apollo-server-micro';
 import { MicroRequest } from 'apollo-server-micro/dist/types';
 import bcrypt from 'bcrypt';
 import { serialize } from 'cookie';
-import { verifyCsrfToken } from './util/auth';
-import { createCsrfToken } from './util/auth.js';
 import {
   createSession,
   createUser,
   deleteSessionByToken,
+  deleteUser,
   getAllSessions,
   getAllUsers,
   getUserById,
@@ -25,21 +24,13 @@ import { typeDefs } from './util/gqlTypedefs.js';
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
   Query: {
-    getAllUsers: (parent: void, args: {}, context: { res: ServerResponse }) => {
+    getAllUsers: () => {
       return getAllUsers();
     },
-    getAllSessions: (
-      parent: void,
-      args: {},
-      context: { res: ServerResponse },
-    ) => {
+    getAllSessions: () => {
       return getAllSessions();
     },
-    getUserById: (
-      parent: void,
-      args: { id: string },
-      context: { res: ServerResponse },
-    ) => {
+    getUserById: (parent: void, args: { id: string }) => {
       return getUserById(parseInt(args.id));
     },
   },
@@ -55,26 +46,29 @@ const resolvers = {
         parseInt(args.level),
         passwordHash,
       );
-
+      console.log('0.');
       // 1. Create a unique token
       const token = crypto.randomBytes(64).toString('base64');
-
+      console.log('1.');
       // 2. Create the session
       const session = await createSession(token, user.id);
 
+      console.log('2.');
       console.log(session);
-
       // 3. Serialize the cookie
       const serializedCookie = await createSerializedRegisterSessionTokenCookie(
         session.token,
       );
-
+      console.log('3.');
       context.res.setHeader('Set-Cookie', serializedCookie);
       return {
-        token: createCsrfToken(),
         user: user,
         error: '',
       };
+    },
+    async createSession(parent: void, args: { token: string; userID: string }) {
+      const session = await createSession(args.token, parseInt(args.userID));
+      return session;
     },
     async logUserIn(
       parent: void,
@@ -84,7 +78,6 @@ const resolvers = {
       const user = await getUserWithPasswordHashByUsername(args.name);
       if (!user) {
         return {
-          token: '',
           user: {},
           error: 'Login information incorrect',
         };
@@ -96,7 +89,6 @@ const resolvers = {
       );
       if (!passwordCorrect) {
         return {
-          token: '',
           user: {},
           error: 'Password incorrect',
         };
@@ -111,7 +103,7 @@ const resolvers = {
       );
       // add the cookie to the header
       context.res.setHeader('Set-Cookie', serializedCookie);
-      return { token: createCsrfToken(), user: user, error: '' };
+      return { user: user, error: '' };
     },
   },
   async deleteSessionByToken(
@@ -130,6 +122,10 @@ const resolvers = {
       }),
     );
     return session;
+  },
+  async deleteUser(parent: void, args: { id: string }) {
+    const user = await deleteUser(parseInt(args.id));
+    return user;
   },
 };
 
@@ -178,11 +174,3 @@ export default async function graphQlHandler(
     path: '/api/graphql',
   })(req, res);
 }
-
-// The `listen` method launches a web server.
-// apolloServer
-//   .listen({ port: 4000 })
-//   .then(({ url }) => {
-//     console.log(`🚀  Server ready at ${url}`);
-//   })
-//   .catch((e) => console.log(e));
