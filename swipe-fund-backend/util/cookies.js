@@ -1,7 +1,7 @@
 import { serialize } from 'cookie';
 import Cookies from 'js-cookie';
 
-export function getParsedCookie(key: string) {
+export function getParsedCookie(key) {
   const cookieValue = Cookies.get(key); // Type is string | undefined
 
   // Narrowing
@@ -16,7 +16,7 @@ export function getParsedCookie(key: string) {
   }
 }
 
-export function createSerializedRegisterSessionTokenCookie(token: string) {
+export function createSerializedRegisterSessionTokenCookie(token) {
   // check if we are in production e.g. Heroku
   const isProduction = process.env.NODE_ENV === 'production';
 

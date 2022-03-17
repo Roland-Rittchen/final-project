@@ -2,9 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "UpLeveled Node + React TSConfig",
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "target": "es2015",
+    "lib": ["dom", "dom.iterable", "ESNext"],
+    "module": "ESNext",
+    "target": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -18,6 +18,11 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "strict": true
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
   },
   "include": [
     "**/.eslintrc.cjs",

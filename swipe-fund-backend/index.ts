@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 import { ServerResponse } from 'node:http';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { ApolloServer } from 'apollo-server-micro';
-import { MicroRequest } from 'apollo-server-micro/dist/types';
+import { ApolloServer } from 'apollo-server';
+// import { MicroRequest } from 'apollo-server-micro/dist/types';
 import bcrypt from 'bcrypt';
 import { serialize } from 'cookie';
 import {
@@ -15,11 +15,10 @@ import {
   getUserById,
   getUserWithPasswordHashByUsername,
 } from './util/connectToDatabase.js';
-import { createSerializedRegisterSessionTokenCookie } from './util/cookies';
-import { typeDefs } from './util/gqlTypedefs.js';
+import { createSerializedRegisterSessionTokenCookie } from './util/cookies.js';
+import { typeDefs } from './util/gqlTypedefs';
 
-// const csrfTokenMatches = verifyCsrfToken(request.body.csrfToken);
-
+// const url = 'http://localhost:4000/';
 // Resolvers define the technique for fetching the types defined in the
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
@@ -35,46 +34,59 @@ const resolvers = {
     },
   },
   Mutation: {
-    async createUser(
+    createUser: async (
       parent: void,
       args: { name: string; level: string; password: string },
       context: { res: ServerResponse },
-    ) {
+    ) => {
       const passwordHash = await bcrypt.hash(args.password, 12);
       const user = await createUser(
         args.name,
         parseInt(args.level),
         passwordHash,
       );
-      console.log('0.');
+      // console.log('0.');
       // 1. Create a unique token
       const token = crypto.randomBytes(64).toString('base64');
-      console.log('1.');
+      // console.log('1.');
       // 2. Create the session
       const session = await createSession(token, user.id);
-
-      console.log('2.');
-      console.log(session);
+      // console.log('2.');
+      // console.log('2 session: ' + JSON.stringify(session));
       // 3. Serialize the cookie
       const serializedCookie = await createSerializedRegisterSessionTokenCookie(
         session.token,
       );
-      console.log('3.');
+      // console.log('3.');
+      // console.log('3. user: ' + JSON.stringify(user));
       context.res.setHeader('Set-Cookie', serializedCookie);
       return {
-        user: user,
+        user: {
+          id: user.id,
+          username: user.username,
+          userlevel: user.userlevel,
+          password_hash: '',
+        },
         error: '',
       };
     },
-    async createSession(parent: void, args: { token: string; userID: string }) {
+    createSession: async (
+      parent: void,
+      args: { token: string; userID: string },
+    ) => {
       const session = await createSession(args.token, parseInt(args.userID));
-      return session;
+      return {
+        id: session[0].id,
+        token: session[0].token,
+        expiry_timestamp: session[0].expiry_timestamp,
+        userId: session[0].userId,
+      };
     },
-    async logUserIn(
+    logUserIn: async (
       parent: void,
       args: { name: string; password: string },
       context: { res: ServerResponse },
-    ) {
+    ) => {
       const user = await getUserWithPasswordHashByUsername(args.name);
       if (!user) {
         return {
@@ -105,27 +117,28 @@ const resolvers = {
       context.res.setHeader('Set-Cookie', serializedCookie);
       return { user: user, error: '' };
     },
-  },
-  async deleteSessionByToken(
-    parent: void,
-    args: {},
-    context: { res: ServerResponse },
-  ) {
-    const session = await deleteSessionByToken(
-      context.res.getHeader('Set-Cookie'),
-    );
-    context.res.setHeader(
-      'Set-Cookie',
-      serialize('sessionToken', '', {
-        maxAge: -1,
-        path: '/',
-      }),
-    );
-    return session;
-  },
-  async deleteUser(parent: void, args: { id: string }) {
-    const user = await deleteUser(parseInt(args.id));
-    return user;
+    deleteSessionByToken: async (
+      parent: void,
+      args: {},
+      context: { res: ServerResponse },
+    ) => {
+      const token = context.res.getHeader('Set-Cookie');
+      if (token) {
+        await deleteSessionByToken(token);
+        context.res.setHeader(
+          'Set-Cookie',
+          serialize('sessionToken', '', {
+            maxAge: -1,
+            path: '/',
+          }),
+        );
+      }
+      return;
+    },
+    deleteUser: async (parent: void, args: { id: string }) => {
+      const user = await deleteUser(parseInt(args.id));
+      return user;
+    },
   },
 };
 
@@ -147,30 +160,42 @@ const apolloServer = new ApolloServer({
   },
 });
 
-const startServer = apolloServer.start();
+apolloServer
+  .listen()
+  .then(({ url }) => {
+    console.log(`🚀  Server ready at ${url}`);
+  })
+  .catch((e) => console.log(e));
 
-export default async function graphQlHandler(
-  req: MicroRequest,
-  res: ServerResponse,
-) {
-  // Headers for Apollo Studio
-  // https://stackoverflow.com/a/68890931/1268612
-  Object.entries({
-    'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Origin': 'https://studio.apollographql.com',
-    'Access-Control-Allow-Headers':
-      'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Methods, Access-Control-Allow-Origin, Access-Control-Allow-Credentials, Access-Control-Allow-Headers',
-    'Access-Control-Allow-Methods':
-      'POST, GET, PUT, PATCH, DELETE, OPTIONS, HEAD',
-  }).forEach(([key, value]) => res.setHeader(key, value));
+// const startServer = apolloServer.start();
 
-  if (req.method === 'OPTIONS') {
-    res.end();
-    return false;
-  }
+// The `listen` method launches a web server.
 
-  await startServer;
-  await apolloServer.createHandler({
-    path: '/api/graphql',
-  })(req, res);
-}
+// export default async function graphQlHandler(
+//   req: MicroRequest,
+//   res: ServerResponse,
+// ) {
+//   res.setHeader('Access-Control-Allow-Credentials', 'true');
+//   res.setHeader(
+//     'Access-Control-Allow-Origin',
+//     'https://studio.apollographql.com',
+//   );
+//   res.setHeader(
+//     'Access-Control-Allow-Headers',
+//     'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Methods, Access-Control-Allow-Origin, Access-Control-Allow-Credentials, Access-Control-Allow-Headers',
+//   );
+//   res.setHeader(
+//     'Access-Control-Allow-Methods',
+//     'POST, GET, PUT, PATCH, DELETE, OPTIONS, HEAD',
+//   );
+
+//   if (req.method === 'OPTIONS') {
+//     res.end();
+//     return false;
+//   }
+
+//   await startServer;
+//   await apolloServer.createHandler({
+//     path: '/api/graphql',
+//   })(req, res);
+// }

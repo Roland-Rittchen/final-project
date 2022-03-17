@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import bcrypt from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { verifyCsrfToken } from '../../util/auth';
 import { createSerializedRegisterSessionTokenCookie } from '../../util/cookies';
 import {
   createSession,
@@ -46,20 +45,6 @@ export default async function loginHandler(
       return; // Important: will prevent "Headers already sent" error
     }
 
-    // Verify CSRF Token
-    const csrfTokenMatches = verifyCsrfToken(request.body.csrfToken);
-
-    if (!csrfTokenMatches) {
-      response.status(403).json({
-        errors: [
-          {
-            message: 'Invalid CSRF token',
-          },
-        ],
-      });
-      return; // Important: will prevent "Headers already sent" error
-    }
-
     const userWithPasswordHash = await getUserWithPasswordHashByUsername(
       request.body.username,
     );
@@ -96,8 +81,6 @@ export default async function loginHandler(
 
     // 2. Create the session
     const session = await createSession(sessionToken, userWithPasswordHash.id);
-
-    console.log(session);
 
     // 3. Serialize the cookie
     const serializedCookie = await createSerializedRegisterSessionTokenCookie(

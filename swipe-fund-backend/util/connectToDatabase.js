@@ -104,30 +104,31 @@ export async function createUser(name, level, password) {
 }
 
 export async function createSession(token, userId) {
-  const [session] = await sql`
+  const session = await sql`
     INSERT INTO sessions
       (token, user_id)
     VALUES
       (${token}, ${userId})
     RETURNING
       id,
-      token;
+      token,
+      expiry_timestamp,
+      user_id;
   `;
 
   await deleteExpiredSessions();
-
-  return session;
+  // console.log('create session: ' + JSON.stringify(session));
+  return session[0];
 }
 
 export async function deleteSessionByToken(token) {
-  const [session] = await sql`
+  await sql`
     DELETE FROM
       sessions
     WHERE
-      token = ${token}
-    RETURNING *;
+      token = ${token};
   `;
-  return session;
+  return;
 }
 
 export async function deleteUser(id) {

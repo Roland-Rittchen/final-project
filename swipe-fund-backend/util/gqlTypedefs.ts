@@ -5,14 +5,12 @@ export type User = {
   username: String;
   userlevel: number;
   password_hash: String;
-  session: Session;
 };
 
 export type Session = {
   id: number;
   token: String;
   expiry_timestamp: string;
-  user: User;
   userId: number;
 };
 
@@ -31,8 +29,11 @@ export const typeDefs = gql`
     id: ID!
     token: String!
     expiry_timestamp: DateTime!
-    user: User!
     userId: Int!
+  }
+
+  type Success {
+    success: Boolean
   }
 
   type AuthPayload {
@@ -54,8 +55,8 @@ export const typeDefs = gql`
     createUser(name: String!, level: Int!, password: String!): AuthPayload
     createSession(token: String!, userId: Int!): Session!
     deleteExpiredSessions: Session!
-    deleteSessionByToken(token: String): Session
-    login(email: String!, password: String!): AuthPayload
+    deleteSessionByToken(token: String): Success
+    logUserIn(email: String!, password: String!): AuthPayload
     deleteUser(id: Int!): User
   }
 `;
