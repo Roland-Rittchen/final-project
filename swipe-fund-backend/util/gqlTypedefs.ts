@@ -5,6 +5,7 @@ export type User = {
   username: String;
   userlevel: number;
   password_hash: String;
+  sessionId: number;
 };
 
 export type Session = {
@@ -22,7 +23,7 @@ export const typeDefs = gql`
     username: String!
     userlevel: Int!
     password_hash: String
-    session: Session
+    sessionId: Int
   }
 
   type Session {
@@ -46,16 +47,16 @@ export const typeDefs = gql`
     getAllSessions: [Session]!
     getUserById(id: Int!): User!
     getUserByUsername(name: String): User!
-    getUserBySessionToken(token: String): User!
+    getUserBySessionToken: User
     getUserWithPasswordHashByUsername(name: String!): User!
-    getValidSessionByToken(token: String): Session!
+    getValidSessionByToken: Session!
   }
 
   type Mutation {
     createUser(name: String!, level: Int!, password: String!): AuthPayload
     createSession(token: String!, userId: Int!): Session!
     deleteExpiredSessions: Session!
-    deleteSessionByToken(token: String): Success
+    deleteSessionByToken: Success
     logUserIn(email: String!, password: String!): AuthPayload
     deleteUser(id: Int!): User
   }

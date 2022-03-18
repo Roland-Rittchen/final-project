@@ -138,5 +138,5 @@ export async function deleteUser(id) {
     WHERE
       id = ${id}
     RETURNING *; `;
-  return user;
+  return user[0];
 }

@@ -14,6 +14,7 @@ import {
   getAllUsers,
   getUserById,
   getUserWithPasswordHashByUsername,
+  getValidSessionByToken,
 } from './util/connectToDatabase.js';
 import { createSerializedRegisterSessionTokenCookie } from './util/cookies.js';
 import { typeDefs } from './util/gqlTypedefs';
@@ -31,6 +32,23 @@ const resolvers = {
     },
     getUserById: (parent: void, args: { id: string }) => {
       return getUserById(parseInt(args.id));
+    },
+    getValidSessionByToken: async (parent: void, args: { token: string }) => {
+      const session = await getValidSessionByToken(args.token);
+      return session;
+    },
+    getUserBySessionToken: async (
+      parent: void,
+      args: {},
+      context: { res: ServerResponse },
+    ) => {
+      const token = context.res.getHeader('Set-Cookie');
+      if (token) {
+        const session = await getValidSessionByToken(token);
+        const user = await getUserById(session.userId);
+        return user;
+      }
+      return;
     },
   },
   Mutation: {
@@ -66,6 +84,7 @@ const resolvers = {
           username: user.username,
           userlevel: user.userlevel,
           password_hash: '',
+          sessionId: session.id,
         },
         error: '',
       };
@@ -160,6 +179,7 @@ const apolloServer = new ApolloServer({
   },
 });
 
+// const apolloServer = new ApolloServer({ typeDefs, resolvers });
 apolloServer
   .listen()
   .then(({ url }) => {
