@@ -1,4 +1,4 @@
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
 import { StatusBar } from 'expo-status-bar';
 import React, { useContext, useState } from 'react';
 import {
@@ -14,17 +14,21 @@ import { userContext } from '../../util/Context';
 import { Props } from '../../util/navigationTypes';
 
 interface Users {
-  id: number;
-  username: String;
-  userlevel: number;
-  sessionId: number;
+  user: {
+    id: number;
+    username: String;
+    userlevel: number;
+    accountVal: number;
+    sessionId: number;
+  };
+  error: String;
 }
 
 const createUser = gql`
   mutation CreateUser(
     $name: String!
     $level: Int!
-    $accountVal: Real!
+    $accountVal: Int!
     $password: String!
   ) {
     createUser(
@@ -37,8 +41,18 @@ const createUser = gql`
         id
         username
         userlevel
+        accountVal
         sessionId
       }
+      error
+    }
+  }
+`;
+
+const userExist = gql`
+  query GetUserExists($name: String) {
+    getUserExists(name: $name) {
+      error
     }
   }
 `;
@@ -46,59 +60,113 @@ const createUser = gql`
 export default function Signup({ navigation }: Props) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const { user } = useContext(userContext);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [success, setSuccess] = useState(true);
   const { setUser } = useContext(userContext);
-  const [createNewUser, { data, error, reset }] = useMutation<
+  const [createNewUser, { error, reset }] = useMutation<
     { createUser: Users },
     { name: string; level: number; accountVal: number; password: string }
-  >(createUser); // , {
-  //   onCompleted: () => {},
-  // });
+  >(createUser);
+  const {
+    loading,
+    error: queryError,
+    data: checkExist,
+    refetch,
+  } = useQuery(userExist, {
+    variables: { name },
+  });
 
   async function submitRegistration(e: NativeSyntheticEvent<NativeTouchEvent>) {
     e.preventDefault();
-    try {
-      const tmpUser = await createNewUser({
-        variables: {
-          name: name,
-          level: 1,
-          accountVal: 100,
-          password: password,
-        },
-      });
-      // console.log(JSON.stringify(tmpUser.data.createUser.user));
-      if (tmpUser.data.createUser.user) {
-        const tU = tmpUser.data.createUser.user;
-        // console.log('TU: ' + JSON.stringify(tU));
-        setUser({
-          id: parseInt(tU.id),
-          username: tU.username,
-          userlevel: parseInt(tU.userlevel),
-          sessionId: parseInt(tU.sessionId),
-        });
-        // console.log('USER: ' + JSON.stringify(user));
-      }
-      // console.log('reset und route');
-      setName('');
-      setPassword('');
-      navigation.navigate('Home');
-    } catch (err) {
-      // console.log('Error creating the user: ' + err);
+    setErrorMsg('');
+    if (password === '') {
+      setErrorMsg('No Password provided');
+      setSuccess(false);
     }
+    if (name === '') {
+      setErrorMsg('No Username provided');
+      setSuccess(false);
+    }
+    try {
+      await refetch();
+      if (checkExist.getUserExists.error !== '') {
+        setErrorMsg(checkExist.getUserExists.error);
+        setSuccess(false);
+      }
+    } catch (err) {
+      console.log('Error checking the user: ' + err);
+    }
+    if (success) {
+      try {
+        createNewUser({
+          variables: {
+            name: name,
+            level: 1,
+            accountVal: 100,
+            password: password,
+          },
+        })
+          .then((tmpUser) => {
+            // console.log(tmpUser);
+            if (tmpUser.data.createUser.user !== null) {
+              setUser({
+                id: tmpUser.data.createUser.user.id,
+                username: tmpUser.data.createUser.user.username,
+                userlevel: tmpUser.data.createUser.user.userlevel,
+                sessionId: tmpUser.data.createUser.user.sessionId,
+              });
+              setErrorMsg(tmpUser.data.createUser.error);
+            }
+          })
+          .catch((er) => console.log('Error creating the user: ' + er));
+        // const tmpUser = await createNewUser({
+        //   variables: {
+        //     name: name,
+        //     level: 1,
+        //     accountVal: 100,
+        //     password: password,
+        //   },
+        // });
+
+        // console.log(JSON.stringify(tmpUser));
+        // if (tmpUser.data.createUser.user) {
+        //   const tU = tmpUser.data.createUser.user;
+
+        //   setUser({
+        //     id: parseInt(tU.id),
+        //     username: tU.username,
+        //     userlevel: parseInt(tU.userlevel),
+        //     sessionId: parseInt(tU.sessionId),
+        //   });
+        // }
+        // setErrorMsg(tmpUser.data.createUser.error);
+
+        if (errorMsg === '') {
+          // console.log('error msg empty');
+          setName('');
+          setPassword('');
+          navigation.navigate('Home');
+        }
+      } catch (err) {
+        console.log('Error creating the user: ' + err);
+        reset();
+      }
+    }
+    setSuccess(true);
   }
 
-  if (error) {
-    return (
-      <View style={styles.container}>
-        {/* <Text>`full error: ${JSON.stringify(error, null, 2)}`</Text> */}
-        <Text>
-          `Submission error! ${error.message} the data is $
-          {JSON.stringify(data)}`
-        </Text>
-        <Button title="Dismiss" onPress={() => reset()} />
-      </View>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <View style={styles.container}>
+  //       {/* <Text>`full error: ${JSON.stringify(error, null, 2)}`</Text> */}
+  //       <Text>
+  //         `Submission error! ${error.message} the data is $
+  //         {JSON.stringify(data)}`
+  //       </Text>
+  //       <Button title="Dismiss" onPress={() => reset()} />
+  //     </View>
+  //   );
+  // }
   return (
     <View style={styles.container}>
       <StatusBar />
@@ -120,8 +188,8 @@ export default function Signup({ navigation }: Props) {
           value={password}
           onChangeText={(e) => setPassword(e)}
         />
+        <Text style={styles.error}>{errorMsg}</Text>
         <Button title="Submit" onPress={(e) => submitRegistration(e)} />
-        <Text>{JSON.stringify(data)}</Text>
       </View>
     </View>
   );
@@ -141,20 +209,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
   },
-  err: {
+  error: {
     color: 'red',
     fontWeight: 'bold',
   },
 });
-
-/*
-{
-  "createUser":{
-    "user":{
-      "id":"34",
-      "__typename":"User"
-    },
-  "__typename":"AuthPayload"
-  }
-}
-*/

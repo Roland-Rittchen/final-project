@@ -30,21 +30,24 @@ export default function Homescreen({ navigation }: Props) {
   const { data, error, loading } = useQuery(userQuery);
   const { user } = useContext(userContext);
   const { setUser } = useContext(userContext);
-  const { data: userBySessData } = useQuery(getUserBySession);
+  const { data: userBySessData } = useQuery(getUserBySession, {
+    pollInterval: 1000,
+  });
 
   useEffect(() => {
-    console.log(JSON.stringify(userBySessData.getUserBySessionToken));
-    if (userBySessData.getUserBySessionToken) {
-      const tU = userBySessData.getUserBySessionToken;
-      setUser({
-        id: parseInt(tU.id),
-        username: tU.username,
-        userlevel: tU.userlevel,
-        accountVal: tU.accountVal,
-        sessionId: tU.sessionId,
-      });
+    if (userBySessData) {
+      if (userBySessData.getUserBySessionToken) {
+        const tU = userBySessData.getUserBySessionToken;
+        setUser({
+          id: parseInt(tU.id),
+          username: tU.username,
+          userlevel: tU.userlevel,
+          accountVal: tU.accountVal,
+          sessionId: tU.sessionId,
+        });
+      }
     }
-  }, [userBySessData, setUser]);
+  }, [setUser, userBySessData]);
 
   return (
     <View style={styles.container}>

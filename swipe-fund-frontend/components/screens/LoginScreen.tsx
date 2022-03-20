@@ -14,10 +14,14 @@ import { userContext } from '../../util/Context';
 import { Props } from '../../util/navigationTypes';
 
 interface Users {
-  id: number;
-  username: String;
-  userlevel: number;
-  sessionId: number;
+  user: {
+    id: number;
+    username: String;
+    userlevel: number;
+    accountVal: number;
+    sessionId: number;
+  };
+  error: String;
 }
 
 const logUserIn = gql`
@@ -27,8 +31,10 @@ const logUserIn = gql`
         id
         username
         userlevel
+        accountVal
         sessionId
       }
+      error
     }
   }
 `;
@@ -36,7 +42,8 @@ const logUserIn = gql`
 export default function Login({ navigation }: Props) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const { user } = useContext(userContext);
+  const [errorMsg, setErrorMsg] = useState('');
+
   const { setUser } = useContext(userContext);
   const [loginUser, { data, error, reset }] = useMutation<
     { loginUser: Users },
@@ -54,17 +61,24 @@ export default function Login({ navigation }: Props) {
         const tU = tmpUser.data.logUserIn.user;
         // console.log('TU: ' + JSON.stringify(tU));
         setUser({
-          id: parseInt(tU.id),
+          id: tU.id,
           username: tU.username,
-          userlevel: parseInt(tU.userlevel),
-          sessionId: parseInt(tU.sessionId),
+          userlevel: tU.userlevel,
+          accountVal: tU.accountVal,
+          sessionId: tU.sessionId,
         });
+
         // console.log('USER: ' + JSON.stringify(user));
       }
+
+      setErrorMsg(tmpUser.data.logUserIn.error);
       // console.log('reset und route');
-      setName('');
-      setPassword('');
-      navigation.navigate('Home');
+      if (errorMsg === '') {
+        console.log(errorMsg);
+        setName('');
+        setPassword('');
+        navigation.navigate('Home');
+      }
     } catch (err) {
       console.log('Error logging in: ' + err);
     }
@@ -91,6 +105,7 @@ export default function Login({ navigation }: Props) {
           value={password}
           onChangeText={(e) => setPassword(e)}
         />
+        <Text style={styles.error}>{errorMsg}</Text>
         <Button title="Login" onPress={(e) => submitLogin(e)} />
         <Text>Not registered yet? Register here: </Text>
         <Button
@@ -115,5 +130,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
+  },
+  error: {
+    color: 'red',
+    fontWeight: 'bold',
   },
 });
