@@ -166,7 +166,7 @@ export async function deleteUser(id) {
 }
 
 export async function changeUserSessionId(userId, id) {
-  const resp = await sql`
+  await sql`
     UPDATE
       users
     SET
