@@ -1,4 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
+import React from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Props } from '../../util/navigationTypes';
 import { Header } from '../Header';
@@ -7,9 +8,9 @@ export default function Contact({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <StatusBar />
-      <Header navigation={navigation} />
+
       <View style={styles.container}>
-        <Text>Register:</Text>
+        <Text>Contact us at randomaddress 123</Text>
       </View>
     </View>
   );

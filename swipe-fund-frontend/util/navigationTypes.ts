@@ -6,4 +6,4 @@ type RootStackParamList = {
   Feed: { sort: 'latest' | 'top' } | undefined;
 };
 
-export type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
+export type Props = NativeStackScreenProps<RootStackParamList>;

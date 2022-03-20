@@ -1,15 +1,35 @@
+import { gql, useMutation } from '@apollo/client';
 import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { Button, StyleSheet, View } from 'react-native';
+import { userContext } from '../../util/Context';
 import { Props } from '../../util/navigationTypes';
-import { Header } from '../Header';
+
+const deleteSession = gql`
+  mutation DeleteSessionByToken {
+    deleteSessionByToken {
+      success
+    }
+  }
+`;
 
 export default function Logout({ navigation }: Props) {
+  const { setUser } = useContext(userContext);
+  const [logoutUser] = useMutation(deleteSession);
   return (
     <View style={styles.container}>
       <StatusBar />
-      <Header navigation={navigation} />
+
       <View style={styles.container}>
-        <Button title="Logout" onPress={() => navigation.navigate('Home')} />
+        <Button
+          title="Logout"
+          onPress={async (e) => {
+            e.preventDefault();
+            await logoutUser();
+            setUser(undefined);
+            navigation.navigate('Home');
+          }}
+        />
       </View>
     </View>
   );

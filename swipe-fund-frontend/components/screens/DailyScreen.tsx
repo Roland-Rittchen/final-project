@@ -1,15 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Props } from '../../util/navigationTypes';
-import { Header } from '../Header';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-export default function Daily({ navigation }: Props) {
+export default function Daily() {
   return (
     <View style={styles.container}>
       <StatusBar />
-      <Header navigation={navigation} />
       <View style={styles.container}>
-        <Text>Register:</Text>
+        <Text>Daily Screen</Text>
       </View>
     </View>
   );
