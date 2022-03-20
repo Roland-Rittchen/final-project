@@ -1,5 +1,5 @@
 exports.up = async (sql) => {
-  console.log('Initializing database...');
+  console.log('Initializing database sessions...');
   await sql`
 		CREATE TABLE sessions (
 			id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -11,8 +11,8 @@ exports.up = async (sql) => {
 };
 
 exports.down = async (sql) => {
-  console.log('Dropping tables...');
+  console.log('Dropping table sessions...');
   await sql`
-		DROP TABLE "session";
+		DROP TABLE "sessions";
   `;
 };

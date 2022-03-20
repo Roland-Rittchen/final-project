@@ -4,14 +4,14 @@ export type User = {
   id: number;
   username: String;
   userlevel: number;
-  password_hash: String;
+  passwordHash: String;
   sessionId: number;
 };
 
 export type Session = {
   id: number;
   token: String;
-  expiry_timestamp: string;
+  expiryTimestamp: string;
   userId: number;
 };
 
@@ -22,14 +22,15 @@ export const typeDefs = gql`
     id: ID!
     username: String!
     userlevel: Int!
-    password_hash: String
+    accountVal: Float!
+    passwordHash: String
     sessionId: Int
   }
 
   type Session {
     id: ID!
     token: String!
-    expiry_timestamp: DateTime!
+    expiryTimestamp: DateTime!
     userId: Int!
   }
 
@@ -53,11 +54,18 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    createUser(name: String!, level: Int!, password: String!): AuthPayload
+    createUser(
+      name: String!
+      level: Int!
+      accountVal: Float!
+      password: String!
+    ): AuthPayload
     createSession(token: String!, userId: Int!): Session!
     deleteExpiredSessions: Session!
     deleteSessionByToken: Success
-    logUserIn(email: String!, password: String!): AuthPayload
+    deleteSessionByTokenManual(token: String!): Success
+    logUserIn(name: String!, password: String!): AuthPayload!
     deleteUser(id: Int!): User
+    changeUserSessionId(userId: Int!, id: Int!): Success
   }
 `;

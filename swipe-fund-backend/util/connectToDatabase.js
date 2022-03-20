@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import camelcaseKeys from 'camelcase-keys';
 import { config } from 'dotenv-safe';
 import postgres from 'postgres';
 
@@ -19,11 +19,13 @@ export async function deleteExpiredSessions() {
 
 // QUERIES
 export async function getAllUsers() {
-  return await sql`SELECT * FROM users;`;
+  const resp = await sql`SELECT * FROM users;`;
+  return resp.map((user) => camelcaseKeys(user));
 }
 
 export async function getAllSessions() {
-  return await sql`SELECT * FROM sessions;`;
+  const resp = await sql`SELECT * FROM sessions;`;
+  return resp.map((session) => camelcaseKeys(session));
 }
 
 export async function getUserById(id) {
@@ -32,6 +34,7 @@ export async function getUserById(id) {
     id: resp[0].id,
     username: resp[0].username,
     userlevel: resp[0].userlevel,
+    accountVal: resp[0].account_val,
   };
 }
 
@@ -40,7 +43,9 @@ export async function getUserBySessionToken(token) {
   const [user] = await sql`
     SELECT
       users.id,
-      users.username
+      users.username,
+      users.level,
+      users.account_val
     FROM
       users,
       sessions
@@ -49,7 +54,12 @@ export async function getUserBySessionToken(token) {
       sessions.user_id = users.id AND
       sessions.expiry_timestamp > now();
   `;
-  return user;
+  return {
+    id: user[0].id,
+    username: user[0].username,
+    userlevel: user[0].userlevel,
+    accountVal: user[0].account_val,
+  };
 }
 
 export async function getValidSessionByToken(token) {
@@ -66,40 +76,54 @@ export async function getValidSessionByToken(token) {
 
   await deleteExpiredSessions();
 
-  return session;
+  return camelcaseKeys(session);
 }
 
 export async function getUserByUsername(name) {
-  const [user] = await sql`
-    SELECT id FROM users WHERE username = ${name};
+  const resp = await sql`
+    SELECT * FROM users WHERE username = ${name};
   `;
-  return user;
+  return {
+    id: resp[0].id,
+    username: resp[0].username,
+    userlevel: resp[0].userlevel,
+    accountVal: resp[0].account_val,
+  };
 }
 
 export async function getUserWithPasswordHashByUsername(name) {
-  const [user] = await sql`
+  const resp = await sql`
     SELECT
-      id,
-      username,
-      password_hash
+      *
     FROM
       users
     WHERE
       username = ${name};
   `;
-  return user;
+  if (!resp[0]) {
+    return undefined;
+  }
+  return {
+    id: resp[0].id,
+    username: resp[0].username,
+    userlevel: resp[0].userlevel,
+    accountVal: resp[0].account_val,
+    passwordHash: resp[0].password_hash,
+  };
 }
 
 // MUTATIONS
 
-export async function createUser(name, level, password) {
-  const passwordHash = await bcrypt.hash(password, 12);
-  const user = await sql`INSERT INTO users (username, userlevel, password_hash)
-  VALUES (${name}, ${level}, ${passwordHash}) RETURNING id;`;
+export async function createUser(name, level, accountVal, password) {
+  // const passwordHash = await bcrypt.hash(password, 12);
+  const user =
+    await sql`INSERT INTO users (username, userlevel, account_val, password_hash)
+  VALUES (${name}, ${level}, ${accountVal}, ${password}) RETURNING id;`;
   return {
     id: user[0].id,
     username: name,
     userlevel: level,
+    accountVal: accountVal,
   };
 }
 
@@ -118,7 +142,7 @@ export async function createSession(token, userId) {
 
   await deleteExpiredSessions();
   // console.log('create session: ' + JSON.stringify(session));
-  return session[0];
+  return camelcaseKeys(session[0]);
 }
 
 export async function deleteSessionByToken(token) {
@@ -138,5 +162,34 @@ export async function deleteUser(id) {
     WHERE
       id = ${id}
     RETURNING *; `;
-  return user[0];
+  return camelcaseKeys(user[0]);
+}
+
+export async function changeUserSessionId(userId, id) {
+  const resp = await sql`
+    UPDATE
+      users
+    SET
+      session_id = ${id}
+    WHERE
+      id = ${userId};
+    `;
+  // if (!resp[0]) {
+  //   return false;
+  // } else {
+  //   return true;
+  // }
+  return true;
+}
+
+export async function deleteUserSessionId(userId) {
+  const resp = await sql`
+    UPDATE
+      users
+    SET
+      session_id = null
+    WHERE
+      id = ${userId};
+    `;
+  return !!resp[0];
 }

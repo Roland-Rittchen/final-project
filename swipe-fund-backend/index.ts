@@ -2,17 +2,19 @@ import crypto from 'node:crypto';
 import { ServerResponse } from 'node:http';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { ApolloServer } from 'apollo-server';
-// import { MicroRequest } from 'apollo-server-micro/dist/types';
 import bcrypt from 'bcrypt';
 import { serialize } from 'cookie';
 import {
+  changeUserSessionId,
   createSession,
   createUser,
   deleteSessionByToken,
   deleteUser,
+  deleteUserSessionId,
   getAllSessions,
   getAllUsers,
   getUserById,
+  getUserByUsername,
   getUserWithPasswordHashByUsername,
   getValidSessionByToken,
 } from './util/connectToDatabase.js';
@@ -24,8 +26,10 @@ import { typeDefs } from './util/gqlTypedefs';
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
   Query: {
-    getAllUsers: () => {
-      return getAllUsers();
+    getAllUsers: async () => {
+      const resp = await getAllUsers();
+      // console.log(resp);
+      return resp;
     },
     getAllSessions: () => {
       return getAllSessions();
@@ -40,27 +44,48 @@ const resolvers = {
     getUserBySessionToken: async (
       parent: void,
       args: {},
-      context: { res: ServerResponse },
+      context: { res: ServerResponse; req: any },
     ) => {
-      const token = context.res.getHeader('Set-Cookie');
-      if (token) {
-        const session = await getValidSessionByToken(token);
+      const fullRequest = context.req;
+      const sessionToken = fullRequest.get('cookie');
+      if (sessionToken) {
+        const cookie = decodeURIComponent(
+          sessionToken.replace('sessionToken=', ''),
+        );
+        const session = await getValidSessionByToken(cookie);
         const user = await getUserById(session.userId);
         return user;
       }
       return;
     },
+    getUserByUsername: async (parent: void, args: { name: string }) => {
+      const user = await getUserByUsername(args.name);
+      return user;
+    },
+    getUserWithPasswordHashByUsername: async (
+      parent: void,
+      args: { name: string },
+    ) => {
+      const user = await getUserWithPasswordHashByUsername(args.name);
+      return user;
+    },
   },
   Mutation: {
     createUser: async (
       parent: void,
-      args: { name: string; level: string; password: string },
+      args: {
+        name: string;
+        level: string;
+        accountVal: number;
+        password: string;
+      },
       context: { res: ServerResponse },
     ) => {
       const passwordHash = await bcrypt.hash(args.password, 12);
       const user = await createUser(
         args.name,
         parseInt(args.level),
+        args.accountVal,
         passwordHash,
       );
       // console.log('0.');
@@ -69,8 +94,10 @@ const resolvers = {
       // console.log('1.');
       // 2. Create the session
       const session = await createSession(token, user.id);
-      // console.log('2.');
-      // console.log('2 session: ' + JSON.stringify(session));
+      const update = await changeUserSessionId(user.id, session.id);
+      if (!update) {
+        return { user: {}, error: 'no session Id set' };
+      }
       // 3. Serialize the cookie
       const serializedCookie = await createSerializedRegisterSessionTokenCookie(
         session.token,
@@ -83,7 +110,7 @@ const resolvers = {
           id: user.id,
           username: user.username,
           userlevel: user.userlevel,
-          password_hash: '',
+          passwordHash: '',
           sessionId: session.id,
         },
         error: '',
@@ -97,7 +124,7 @@ const resolvers = {
       return {
         id: session[0].id,
         token: session[0].token,
-        expiry_timestamp: session[0].expiry_timestamp,
+        expiryTimestamp: session[0].expiryTimestamp,
         userId: session[0].userId,
       };
     },
@@ -116,7 +143,7 @@ const resolvers = {
       // compare the pw with the hash (error if pw wrong)
       const passwordCorrect = await bcrypt.compare(
         args.password,
-        user.password_hash,
+        user.passwordHash,
       );
       if (!passwordCorrect) {
         return {
@@ -128,22 +155,41 @@ const resolvers = {
       const token = crypto.randomBytes(64).toString('base64');
       // 2. Create the session
       const session = await createSession(token, user.id);
+      const update = await changeUserSessionId(user.id, session.id);
+      if (!update) {
+        return { user: {}, error: 'no session Id set' };
+      }
       // 3. Serialize the cookie
       const serializedCookie = await createSerializedRegisterSessionTokenCookie(
         session.token,
       );
       // add the cookie to the header
       context.res.setHeader('Set-Cookie', serializedCookie);
-      return { user: user, error: '' };
+      return {
+        user: {
+          id: user.id,
+          username: user.username,
+          userlevel: user.userlevel,
+          accountVal: user.accountVal,
+          sessionId: session.id,
+        },
+        error: '',
+      };
     },
     deleteSessionByToken: async (
       parent: void,
       args: {},
-      context: { res: ServerResponse },
+      context: { res: ServerResponse; req: any },
     ) => {
-      const token = context.res.getHeader('Set-Cookie');
-      if (token) {
-        await deleteSessionByToken(token);
+      const fullRequest = context.req;
+      const sessionToken = fullRequest.get('cookie');
+      if (sessionToken) {
+        const cookie = decodeURIComponent(
+          sessionToken.replace('sessionToken=', ''),
+        );
+        const session = await getValidSessionByToken(cookie);
+        await deleteSessionByToken(cookie);
+        await deleteUserSessionId(session.userId);
         context.res.setHeader(
           'Set-Cookie',
           serialize('sessionToken', '', {
@@ -153,6 +199,13 @@ const resolvers = {
         );
       }
       return;
+    },
+    deleteSessionByTokenManual: async (
+      parent: void,
+      args: { token: string },
+    ) => {
+      await deleteSessionByToken(args.token);
+      return true;
     },
     deleteUser: async (parent: void, args: { id: string }) => {
       const user = await deleteUser(parseInt(args.id));
@@ -172,50 +225,17 @@ export const schema = makeExecutableSchema({ typeDefs, resolvers });
 const apolloServer = new ApolloServer({
   schema,
   // Return response to allow setting cookies in resolvers
-  context({ res }) {
+  context({ res, req }) {
     return {
       res,
+      req,
     };
   },
 });
 
-// const apolloServer = new ApolloServer({ typeDefs, resolvers });
 apolloServer
   .listen()
   .then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);
   })
   .catch((e) => console.log(e));
-
-// const startServer = apolloServer.start();
-
-// The `listen` method launches a web server.
-
-// export default async function graphQlHandler(
-//   req: MicroRequest,
-//   res: ServerResponse,
-// ) {
-//   res.setHeader('Access-Control-Allow-Credentials', 'true');
-//   res.setHeader(
-//     'Access-Control-Allow-Origin',
-//     'https://studio.apollographql.com',
-//   );
-//   res.setHeader(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Methods, Access-Control-Allow-Origin, Access-Control-Allow-Credentials, Access-Control-Allow-Headers',
-//   );
-//   res.setHeader(
-//     'Access-Control-Allow-Methods',
-//     'POST, GET, PUT, PATCH, DELETE, OPTIONS, HEAD',
-//   );
-
-//   if (req.method === 'OPTIONS') {
-//     res.end();
-//     return false;
-//   }
-
-//   await startServer;
-//   await apolloServer.createHandler({
-//     path: '/api/graphql',
-//   })(req, res);
-// }
