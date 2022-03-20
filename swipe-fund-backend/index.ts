@@ -15,6 +15,7 @@ import {
   getAllUsers,
   getUserById,
   getUserByUsername,
+  getUserExists,
   getUserWithPasswordHashByUsername,
   getValidSessionByToken,
 } from './util/connectToDatabase.js';
@@ -58,6 +59,19 @@ const resolvers = {
       }
       return;
     },
+    getUserExists: async (parent: void, args: { name: string }) => {
+      const resp = await getUserExists(args.name);
+      // console.log(resp[0]);
+      if (resp[0] !== undefined) {
+        // console.log('user exists');
+        const user = await getUserByUsername(args.name);
+        // console.log(user);
+        return { user: user, error: 'username already taken' };
+      } else {
+        // console.log('user not exist');
+        return { user: {}, error: '' };
+      }
+    },
     getUserByUsername: async (parent: void, args: { name: string }) => {
       const user = await getUserByUsername(args.name);
       return user;
@@ -75,16 +89,27 @@ const resolvers = {
       parent: void,
       args: {
         name: string;
-        level: string;
+        level: number;
         accountVal: number;
         password: string;
       },
       context: { res: ServerResponse },
     ) => {
+      // console.log('00');
+      if (!args.name) {
+        return { user: {}, error: 'no username provided' };
+      }
+      const resp = await getUserExists(args.name);
+      if (resp[0] !== undefined) {
+        return { user: {}, error: 'username already taken' };
+      }
+      if (!args.password) {
+        return { user: {}, error: 'no password provided' };
+      }
       const passwordHash = await bcrypt.hash(args.password, 12);
       const user = await createUser(
         args.name,
-        parseInt(args.level),
+        args.level,
         args.accountVal,
         passwordHash,
       );

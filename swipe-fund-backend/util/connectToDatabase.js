@@ -79,6 +79,12 @@ export async function getValidSessionByToken(token) {
   return camelcaseKeys(session);
 }
 
+export async function getUserExists(name) {
+  const resp = await sql`
+    SELECT 1 FROM users WHERE username = ${name};`;
+  return resp;
+}
+
 export async function getUserByUsername(name) {
   const resp = await sql`
     SELECT * FROM users WHERE username = ${name};

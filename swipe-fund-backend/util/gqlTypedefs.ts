@@ -47,7 +47,8 @@ export const typeDefs = gql`
     getAllUsers: [User]!
     getAllSessions: [Session]!
     getUserById(id: Int!): User!
-    getUserByUsername(name: String): User!
+    getUserExists(name: String): AuthPayload
+    getUserByUsername(name: String): User
     getUserBySessionToken: User
     getUserWithPasswordHashByUsername(name: String!): User!
     getValidSessionByToken: Session!
@@ -57,7 +58,7 @@ export const typeDefs = gql`
     createUser(
       name: String!
       level: Int!
-      accountVal: Float!
+      accountVal: Int!
       password: String!
     ): AuthPayload
     createSession(token: String!, userId: Int!): Session!
