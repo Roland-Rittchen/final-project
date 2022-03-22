@@ -42,7 +42,8 @@ services:
 #driver: bridge
 volumes:
   db:
-    driver: bridge #azure_file #bridge
-#driver_opts:
-#  share_name: swipefund
-#  storage_account_name: swipefund
+    #driver: bridge
+    driver: azure_file
+    driver_opts:
+      share_name: swipefund
+      storage_account_name: swipefund
