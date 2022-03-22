@@ -3,38 +3,26 @@ import {
   ApolloClient,
   ApolloProvider,
   createHttpLink,
-  gql,
   InMemoryCache,
-  useMutation,
-  useQuery,
 } from '@apollo/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItem,
-} from '@react-navigation/drawer';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { persistCache } from 'apollo3-cache-persist';
-// import AppLoading from 'expo-app-loading';
 import React, { useEffect, useState } from 'react';
-import { NativeSyntheticEvent, NativeTouchEvent } from 'react-native';
-import { Button } from 'react-native-elements';
 import Contact from './components/screens/ContactScreen';
 import Daily from './components/screens/DailyScreen';
 import Demo from './components/screens/DemoScreen';
 import HomeScreen from './components/screens/HomeScreen';
 import Login from './components/screens/LoginScreen';
 import Logout from './components/screens/LogoutScreen';
-// import Logout from './components/screens/LogoutScreen';
 import Ranking from './components/screens/RankingScreen';
 import Signup from './components/screens/SignupScreen';
 import User from './components/screens/UserScreen';
 import { userContext } from './util/Context';
 import { navigationRef } from './util/RootNavigation';
-import * as RootNavigation from './util/RootNavigation.js';
 
-type User = {
+type UserType = {
   id: number;
   username: String;
   userlevel: number;
@@ -68,17 +56,9 @@ const client = new ApolloClient({
   }, // 'cache-and-network'
 });
 
-const deleteSession = gql`
-  mutation DeleteSessionByToken {
-    deleteSessionByToken {
-      success
-    }
-  }
-`;
-
 export default function App() {
   const [loadingCache, setLoadingCache] = useState(true);
-  const [user, setUser] = useState<User | undefined>();
+  const [user, setUser] = useState<UserType | undefined>();
   // const [delSession] = useMutation(deleteSession, { client: client });
 
   useEffect(() => {
@@ -89,24 +69,6 @@ export default function App() {
       .then(() => setLoadingCache(false))
       .catch((e) => console.log(e));
   }, []);
-
-  function logout() {
-    // e.preventDefault();
-    // await delSession();
-    client
-      .mutate({
-        mutation: gql`DeleteSessionByToken {
-      deleteSessionByToken {
-        success
-      }
-    }`,
-      })
-      .then(() => {
-        setUser(undefined);
-        RootNavigation.navigate('Home');
-      })
-      .catch((er) => console.log(er));
-  }
 
   return (
     <userContext.Provider

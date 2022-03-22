@@ -13,6 +13,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+    "plugins": ["@notifee/react-native"],
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
@@ -21,7 +22,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/android/drawable-hdpi/SwipeFundLogo.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.swipefund"
     },
     "web": {
       "favicon": "./assets/android-chrome-192x192.png"

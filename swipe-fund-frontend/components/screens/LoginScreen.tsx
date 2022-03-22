@@ -45,7 +45,7 @@ export default function Login({ navigation }: Props) {
   const [errorMsg, setErrorMsg] = useState('');
 
   const { setUser } = useContext(userContext);
-  const [loginUser, { data, error, reset }] = useMutation<
+  const [loginUser] = useMutation<
     { loginUser: Users },
     { name: string; password: string }
   >(logUserIn);

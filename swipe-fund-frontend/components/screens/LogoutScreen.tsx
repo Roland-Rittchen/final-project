@@ -1,6 +1,6 @@
 import { gql, useMutation } from '@apollo/client';
 import { StatusBar } from 'expo-status-bar';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { Button, StyleSheet, View } from 'react-native';
 import { userContext } from '../../util/Context';
 import { Props } from '../../util/navigationTypes';

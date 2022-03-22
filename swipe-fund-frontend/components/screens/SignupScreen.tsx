@@ -63,16 +63,11 @@ export default function Signup({ navigation }: Props) {
   const [errorMsg, setErrorMsg] = useState('');
   const [success, setSuccess] = useState(true);
   const { setUser } = useContext(userContext);
-  const [createNewUser, { error, reset }] = useMutation<
+  const [createNewUser, { reset }] = useMutation<
     { createUser: Users },
     { name: string; level: number; accountVal: number; password: string }
   >(createUser);
-  const {
-    loading,
-    error: queryError,
-    data: checkExist,
-    refetch,
-  } = useQuery(userExist, {
+  const { data: checkExist, refetch } = useQuery(userExist, {
     variables: { name },
   });
 
@@ -119,27 +114,6 @@ export default function Signup({ navigation }: Props) {
             }
           })
           .catch((er) => console.log('Error creating the user: ' + er));
-        // const tmpUser = await createNewUser({
-        //   variables: {
-        //     name: name,
-        //     level: 1,
-        //     accountVal: 100,
-        //     password: password,
-        //   },
-        // });
-
-        // console.log(JSON.stringify(tmpUser));
-        // if (tmpUser.data.createUser.user) {
-        //   const tU = tmpUser.data.createUser.user;
-
-        //   setUser({
-        //     id: parseInt(tU.id),
-        //     username: tU.username,
-        //     userlevel: parseInt(tU.userlevel),
-        //     sessionId: parseInt(tU.sessionId),
-        //   });
-        // }
-        // setErrorMsg(tmpUser.data.createUser.error);
 
         if (errorMsg === '') {
           // console.log('error msg empty');
@@ -155,18 +129,6 @@ export default function Signup({ navigation }: Props) {
     setSuccess(true);
   }
 
-  // if (error) {
-  //   return (
-  //     <View style={styles.container}>
-  //       {/* <Text>`full error: ${JSON.stringify(error, null, 2)}`</Text> */}
-  //       <Text>
-  //         `Submission error! ${error.message} the data is $
-  //         {JSON.stringify(data)}`
-  //       </Text>
-  //       <Button title="Dismiss" onPress={() => reset()} />
-  //     </View>
-  //   );
-  // }
   return (
     <View style={styles.container}>
       <StatusBar />

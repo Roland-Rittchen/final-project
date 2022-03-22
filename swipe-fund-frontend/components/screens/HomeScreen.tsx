@@ -1,7 +1,6 @@
 import { gql, useQuery } from '@apollo/client';
-import AppLoading from 'expo-app-loading';
 import { StatusBar } from 'expo-status-bar';
-import React, { Component, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { userContext } from '../../util/Context';
 import { Props } from '../../util/navigationTypes';
@@ -27,7 +26,7 @@ const getUserBySession = gql`
 `;
 
 export default function Homescreen({ navigation }: Props) {
-  const { data, error, loading } = useQuery(userQuery);
+  const { data } = useQuery(userQuery);
   const { user } = useContext(userContext);
   const { setUser } = useContext(userContext);
   const { data: userBySessData } = useQuery(getUserBySession, {
@@ -57,7 +56,14 @@ export default function Homescreen({ navigation }: Props) {
       <Text>{JSON.stringify(data)}</Text>
       <Text>User:</Text>
       {/* <Text>{JSON.stringify(user)}</Text>*/}
-      <Button title="Register" onPress={() => navigation.navigate('Signup')} />
+      {user ? (
+        <Text>{'\n'}</Text>
+      ) : (
+        <Button
+          title="Register"
+          onPress={() => navigation.navigate('Signup')}
+        />
+      )}
     </View>
   );
 }
