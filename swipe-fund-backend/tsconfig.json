@@ -3,9 +3,11 @@
   "display": "UpLeveled Node + React TSConfig",
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "ESNext"],
+    "baseUrl": "./",
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "node",
+    "outDir": "./build",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "isolatedModules": true,

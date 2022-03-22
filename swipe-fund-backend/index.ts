@@ -20,7 +20,7 @@ import {
   getValidSessionByToken,
 } from './util/connectToDatabase.js';
 import { createSerializedRegisterSessionTokenCookie } from './util/cookies.js';
-import { typeDefs } from './util/gqlTypedefs';
+import { typeDefs } from './util/gqlTypedefs.js';
 
 // const url = 'http://localhost:4000/';
 // Resolvers define the technique for fetching the types defined in the
@@ -135,6 +135,7 @@ const resolvers = {
           id: user.id,
           username: user.username,
           userlevel: user.userlevel,
+          accountVal: user.accountVal,
           passwordHash: '',
           sessionId: session.id,
         },

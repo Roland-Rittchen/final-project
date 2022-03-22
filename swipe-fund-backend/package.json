@@ -1,10 +1,14 @@
 {
   "name": "swipe-fund-backend2",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "migrate": "dotenv ley"
+    "migrate": "dotenv ley",
+    "start": "NODE_PATH=./build node build/index.js",
+    "build": "tsc --noEmit false",
+    "dev": "nodemon index.ts"
   },
   "dependencies": {
     "@react-native-cookies/cookies": "^6.0.11",
