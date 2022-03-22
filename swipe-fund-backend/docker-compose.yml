@@ -12,7 +12,7 @@ services:
       - POSTGRES_PASSWORD=swifi
     volumes:
       #- ./sql/initDb.sql:/docker-entrypoint-initdb.d/initDb.sql
-      - db:/var/lib/postgresql/data
+      - ${WEBAPP_STORAGE_HOME}/site/wwwroot:/var/lib/postgresql/data
     #networks:
     #- consumer-producer
   swipefundbackend:
