@@ -6,7 +6,7 @@ import { userContext } from '../../util/Context';
 import { Props } from '../../util/navigationTypes';
 
 const userQuery = gql`
-  query {
+  query GetAllUsers {
     getAllUsers {
       id
       username

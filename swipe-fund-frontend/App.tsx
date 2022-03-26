@@ -53,13 +53,12 @@ const client = new ApolloClient({
       errorPolicy: 'ignore',
       fetchPolicy: 'network-only',
     },
-  }, // 'cache-and-network'
+  },
 });
 
 export default function App() {
   const [loadingCache, setLoadingCache] = useState(true);
   const [user, setUser] = useState<UserType | undefined>();
-  // const [delSession] = useMutation(deleteSession, { client: client });
 
   useEffect(() => {
     persistCache({
@@ -89,6 +88,7 @@ export default function App() {
                 <drawer.Screen name="Daily" component={Daily} />
                 <drawer.Screen name="Ranking" component={Ranking} />
                 {/* <DrawerItem label="Logout" onPress={() => logout()} /> */}
+                <drawer.Screen name="Demo" component={Demo} />
                 <drawer.Screen name="Logout" component={Logout} />
               </drawer.Group>
             ) : (
@@ -97,7 +97,6 @@ export default function App() {
                 <drawer.Screen name="Home" component={HomeScreen} />
                 <drawer.Screen name="Login" component={Login} />
                 <drawer.Screen name="Signup" component={Signup} />
-                <drawer.Screen name="Demo" component={Demo} />
               </drawer.Group>
             )}
             {/* Common modal screens */}
