@@ -22,6 +22,18 @@ import User from './components/screens/UserScreen';
 import { userContext } from './util/Context';
 import { navigationRef } from './util/RootNavigation';
 
+export type RootStackParams = {
+  Home: undefined;
+  Profile: undefined;
+  Daily: undefined;
+  Ranking: undefined;
+  Demo: undefined;
+  Logout: undefined;
+  Login: undefined;
+  Signup: undefined;
+  Contact: undefined;
+};
+
 type UserType = {
   id: number;
   username: String;
@@ -57,7 +69,7 @@ const client = new ApolloClient({
 });
 
 export default function App() {
-  const [loadingCache, setLoadingCache] = useState(true);
+  // const [loadingCache, setLoadingCache] = useState(true);
   const [user, setUser] = useState<UserType | undefined>();
 
   useEffect(() => {
@@ -65,7 +77,7 @@ export default function App() {
       cache,
       storage: AsyncStorage,
     })
-      .then(() => setLoadingCache(false))
+      // .then(() => setLoadingCache(false))
       .catch((e) => console.log(e));
   }, []);
 

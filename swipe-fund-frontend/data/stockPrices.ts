@@ -8,8 +8,44 @@ type DataPoint = {
 
 type Index = keyof DataPoint;
 
+// s&p and nikkei from yahoo finance, dax nasdax NTV
 const indices: Index[] = ['nikkei', 'dax', 'nasdaq', 'sp500'];
 export const data: DataPoint[] = [
+  {
+    date: '2022-03-25',
+    nikkei: 28149.84,
+    dax: 14391.48,
+    nasdaq: 14754.31,
+    sp500: 4543.06,
+  },
+  {
+    date: '2022-03-24',
+    nikkei: 28110.39,
+    dax: 14765.69,
+    nasdaq: 14191.84,
+    sp500: 4520.16,
+  },
+  {
+    date: '2022-03-23',
+    nikkei: 28040.16,
+    dax: 14202.8,
+    nasdaq: 14447.55,
+    sp500: 4456.24,
+  },
+  {
+    date: '2022-03-22',
+    nikkei: 27224.11,
+    dax: 14506.38,
+    nasdaq: 14654.33,
+    sp500: 4511.61,
+  },
+  {
+    date: '2022-03-21',
+    nikkei: 26827.43,
+    dax: 14315.59,
+    nasdaq: 14376.09,
+    sp500: 4461.18,
+  },
   {
     date: '2022-03-18',
     nikkei: 26827.43,
@@ -55,9 +91,10 @@ export function getLabels() {
   return labels;
 }
 
-export function getIndex(index: Index) {
+export function getIndex(index: Index, date: string) {
   const prices: number[] = [];
-  for (let i = 0; i < 5; i++) {
+  const dI = getDateIndex(date);
+  for (let i = dI; i < dI + 5; i++) {
     const tmp = data[i][index];
     if (typeof tmp === 'string') {
       prices.push(parseFloat(tmp));
@@ -68,11 +105,11 @@ export function getIndex(index: Index) {
   return prices;
 }
 
-export function getNormalizedIndex(index: Index) {
+export function getNormalizedIndex(index: Index, date: string) {
   // find the range of all indices
   const indexRange = [];
   for (const ind of indices) {
-    const indPrices = getIndex(ind);
+    const indPrices = getIndex(ind, date);
     const min = Math.min(...indPrices);
     const max = Math.max(...indPrices);
     const range = (max / min - 1) * 100;
@@ -81,7 +118,7 @@ export function getNormalizedIndex(index: Index) {
   // get the maximum range
   const maxRange = Math.max(...indexRange);
   // normalize and center the requested Index
-  const prices = getIndex(index);
+  const prices = getIndex(index, date);
   const avg =
     (Math.max(...prices) - Math.min(...prices)) / 2 + Math.min(...prices);
   return prices.map((price) => {
@@ -93,9 +130,10 @@ export function getNormalizedIndex(index: Index) {
   });
 }
 
-export function getColor(index: Index) {
-  const newest = data[0][index];
-  const oldest = data[4][index];
+export function getColor(index: Index, date: string) {
+  const i = getDateIndex(date);
+  const newest = data[i][index];
+  const oldest = data[i + 4][index];
   if (newest > oldest) {
     return '#6DA10B'; // 'rgb(109,161,11)';
   } else {
@@ -105,8 +143,8 @@ export function getColor(index: Index) {
 
 export type VictoryData = { x: number; y: number }[];
 
-export function getVictoryChartData(index: Index) {
-  const prices = getNormalizedIndex(index);
+export function getVictoryChartData(index: Index, date: string) {
+  const prices = getNormalizedIndex(index, date);
   const retData = [
     { x: 0, y: prices[4] },
     { x: 25, y: prices[3] },
@@ -115,4 +153,19 @@ export function getVictoryChartData(index: Index) {
     { x: 100, y: prices[0] },
   ];
   return retData;
+}
+
+function getDateIndex(date: string) {
+  const dateIndex = (element: DataPoint) => element.date === date;
+  return data.findIndex(dateIndex);
+}
+
+export function getIndexOnDate(index: Index, date: string) {
+  if (index === 'date') {
+    return 0;
+  } else {
+    const dataAtIndex = data[getDateIndex(date)];
+    const val = dataAtIndex[index];
+    return val;
+  }
 }

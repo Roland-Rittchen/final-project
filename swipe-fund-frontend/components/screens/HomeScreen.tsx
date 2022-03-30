@@ -3,7 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useContext, useEffect } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { userContext } from '../../util/Context';
-import { Props } from '../../util/navigationTypes';
+import { RootStackParams } from '../../App';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const userQuery = gql`
   query GetAllUsers {
@@ -25,7 +26,9 @@ const getUserBySession = gql`
   }
 `;
 
-export default function Homescreen({ navigation }: Props) {
+type HomescreenProps = NativeStackScreenProps<RootStackParams, 'Home'>;
+
+export default function Homescreen({ navigation }: HomescreenProps) {
   const { data } = useQuery(userQuery);
   const { user } = useContext(userContext);
   const { setUser } = useContext(userContext);
@@ -54,7 +57,7 @@ export default function Homescreen({ navigation }: Props) {
       {user ? <Text>`logged in `</Text> : <Text>NOT logged in</Text>}
       <Text>Data:</Text>
       <Text>{JSON.stringify(data)}</Text>
-      <Text>User:</Text>
+      <Text>User: 📈 📉 </Text>
       {/* <Text>{JSON.stringify(user)}</Text>*/}
       {user ? (
         <Text>{'\n'}</Text>

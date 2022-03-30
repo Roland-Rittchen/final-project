@@ -1,0 +1,15 @@
+<svg width="150" height="900" viewBox="-75 -450 150 900" >
+
+    <circle cx="0" cy="350" r="40" fill="#9CED05" />
+    <circle cx="0" cy="-350" r="40" fill="#9CED05" />
+    <rect   x="-40" y="-350" width="80" height="700" fill="#9CED05" />
+    <circle cx="0" cy="0" r="60" fill="#9CED05" />
+    <circle cx="0" cy="350" r="60" fill="#9CED05" />
+    <circle cx="0" cy="-350" r="60" fill="#9CED05" />
+
+    <circle cx="0" cy="0" r="45" fill="#FFFFFF" />
+    <circle cx="0" cy="350" r="45" fill="#FFFFFF" />
+    <circle cx="0" cy="-350" r="45" fill="#FFFFFF" />
+    <rect   x="-25" y="-350" width="50" height="700" fill="#FFFFFF" />
+
+  </svg>

@@ -12,23 +12,28 @@ import {
 } from '../../data/stockPrices';
 
 export default function Daily() {
+  const date = '2022-03-25';
   const [news, setNews] = useState<FTdata[]>();
-  const [sp500, setSp500] = useState<VictoryData>(getVictoryChartData('sp500'));
-  const [sp500Color, setSp500Color] = useState<string>(getColor('sp500'));
-  const [dax, setDax] = useState<VictoryData>(getVictoryChartData('dax'));
-  const [daxColor, setDaxColor] = useState<string>(getColor('dax'));
-  const [nasdaq, setNasdaq] = useState<VictoryData>(
-    getVictoryChartData('nasdaq'),
+  const [sp500, setSp500] = useState<VictoryData>(
+    getVictoryChartData('sp500', date),
   );
-  const [nikkeiColor, setNikkeiColor] = useState<string>(getColor('nasdaq'));
+  const [sp500Color, setSp500Color] = useState<string>(getColor('sp500', date));
+  const [dax, setDax] = useState<VictoryData>(getVictoryChartData('dax', date));
+  const [daxColor, setDaxColor] = useState<string>(getColor('dax', date));
+  const [nasdaq, setNasdaq] = useState<VictoryData>(
+    getVictoryChartData('nasdaq', date),
+  );
+  const [nikkeiColor, setNikkeiColor] = useState<string>(
+    getColor('nasdaq', date),
+  );
 
   const getChart = useCallback(() => {
-    setSp500(getVictoryChartData('sp500'));
-    setSp500Color(getColor('sp500'));
-    setDax(getVictoryChartData('dax'));
-    setDaxColor(getColor('dax'));
-    setNasdaq(getVictoryChartData('nasdaq'));
-    setNikkeiColor(getColor('nasdaq'));
+    setSp500(getVictoryChartData('sp500', date));
+    setSp500Color(getColor('sp500', date));
+    setDax(getVictoryChartData('dax', date));
+    setDaxColor(getColor('dax', date));
+    setNasdaq(getVictoryChartData('nasdaq', date));
+    setNikkeiColor(getColor('nasdaq', date));
   }, []);
   const fetchNews = useCallback(() => {
     const tmpNews = data; // await getYahooNews('2022-03-18'); // getNews('2022-03-24');
@@ -45,9 +50,9 @@ export default function Daily() {
           <Text>Daily Screen</Text>
           <Button title="Get new Chart" onPress={() => getChart()} />
           <View style={styles.chartcontainer}>
-            <Victory title='SP 500' data={sp500} color={sp500Color} />
-            <Victory title='DAX' data={dax} color={daxColor} />
-            <Victory title='Nasdaq' data={nasdaq} color={nikkeiColor} />
+            <Victory title="SP 500" data={sp500} color={sp500Color} />
+            <Victory title="DAX" data={dax} color={daxColor} />
+            <Victory title="Nasdaq" data={nasdaq} color={nikkeiColor} />
           </View>
           <Button title="Get the News" onPress={() => fetchNews()} />
           {news
