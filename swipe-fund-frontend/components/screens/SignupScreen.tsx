@@ -2,9 +2,9 @@ import { gql, useMutation, useQuery } from '@apollo/client';
 import { StatusBar } from 'expo-status-bar';
 import React, { useContext, useState } from 'react';
 import {
-  Button,
   NativeSyntheticEvent,
   NativeTouchEvent,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -13,16 +13,16 @@ import {
 import { userContext } from '../../util/Context';
 import { Props } from '../../util/navigationTypes';
 
-interface Users {
-  user: {
-    id: number;
-    username: String;
-    userlevel: number;
-    accountVal: number;
-    sessionId: number;
-  };
-  error: String;
-}
+// interface Users {
+//   user: {
+//     id: number;
+//     username: String;
+//     userlevel: number;
+//     accountVal: number;
+//     sessionId: number;
+//   };
+//   error: String;
+// }
 
 const createUser = gql`
   mutation CreateUser(
@@ -64,7 +64,7 @@ export default function Signup({ navigation }: Props) {
   const [success, setSuccess] = useState(true);
   const { setUser } = useContext(userContext);
   const [createNewUser, { reset }] = useMutation<
-    { createUser: Users },
+    any, // { data: { createUser: { user: Users } } }
     { name: string; level: number; accountVal: number; password: string }
   >(createUser);
   const { data: checkExist, refetch } = useQuery(userExist, {
@@ -133,7 +133,6 @@ export default function Signup({ navigation }: Props) {
     <View style={styles.container}>
       <StatusBar />
       <View style={styles.container}>
-        <Text>Register:</Text>
         <TextInput
           style={styles.input}
           autoCompleteType="username"
@@ -151,7 +150,11 @@ export default function Signup({ navigation }: Props) {
           onChangeText={(e) => setPassword(e)}
         />
         <Text style={styles.error}>{errorMsg}</Text>
-        <Button title="Submit" onPress={(e) => submitRegistration(e)} />
+        <Pressable onPress={(e) => submitRegistration(e)}>
+          <View style={styles.userContainerButton}>
+            <Text style={styles.userTextButton}>Submit</Text>
+          </View>
+        </Pressable>
       </View>
     </View>
   );
@@ -166,13 +169,29 @@ const styles = StyleSheet.create({
   },
   input: {
     borderColor: 'gray',
-    width: '100%',
+    width: 350,
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
+    borderRadius: 15,
+    padding: 20,
+    margin: 15,
   },
   error: {
+    margin: 10,
     color: 'red',
+    fontWeight: 'bold',
+  },
+  userContainerButton: {
+    backgroundColor: '#6DA10B',
+    width: 350,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'stretch',
+    padding: 20,
+    margin: 15,
+    borderRadius: 15,
+  },
+  userTextButton: {
+    color: '#fff',
     fontWeight: 'bold',
   },
 });

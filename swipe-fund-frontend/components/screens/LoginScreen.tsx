@@ -1,28 +1,29 @@
 import { gql, useMutation } from '@apollo/client';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import React, { useContext, useState } from 'react';
 import {
-  Button,
   NativeSyntheticEvent,
   NativeTouchEvent,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { RootStackParams } from '../../App';
 import { userContext } from '../../util/Context';
-import { Props } from '../../util/navigationTypes';
 
-interface Users {
-  user: {
-    id: number;
-    username: String;
-    userlevel: number;
-    accountVal: number;
-    sessionId: number;
-  };
-  error: String;
-}
+// interface Users {
+//   user: {
+//     id: number;
+//     username: String;
+//     userlevel: number;
+//     accountVal: number;
+//     sessionId: number;
+//   };
+//   error: String;
+// }
 
 const logUserIn = gql`
   mutation LogUserIn($name: String!, $password: String!) {
@@ -39,14 +40,16 @@ const logUserIn = gql`
   }
 `;
 
-export default function Login({ navigation }: Props) {
+type LoginscreenProps = NativeStackScreenProps<RootStackParams, 'Login'>;
+
+export default function Login({ navigation }: LoginscreenProps) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
   const { setUser } = useContext(userContext);
   const [loginUser] = useMutation<
-    { loginUser: Users },
+    any, //  { data: { logUserIn: { user: Users } } }
     { name: string; password: string }
   >(logUserIn);
 
@@ -88,7 +91,6 @@ export default function Login({ navigation }: Props) {
     <View style={styles.container}>
       <StatusBar />
       <View style={styles.container}>
-        <Text>Login:</Text>
         <TextInput
           style={styles.input}
           autoCompleteType="username"
@@ -106,12 +108,19 @@ export default function Login({ navigation }: Props) {
           onChangeText={(e) => setPassword(e)}
         />
         <Text style={styles.error}>{errorMsg}</Text>
-        <Button title="Login" onPress={(e) => submitLogin(e)} />
-        <Text>Not registered yet? Register here: </Text>
-        <Button
-          title="Register"
-          onPress={() => navigation.navigate('Signup')}
-        />
+        <Pressable onPress={(e) => submitLogin(e)}>
+          <View style={styles.userContainerButton}>
+            <Text style={styles.userTextButton}>Submit</Text>
+          </View>
+        </Pressable>
+        <Text style={styles.plaintext}>
+          Not registered yet? Register here:{' '}
+        </Text>
+        <Pressable onPress={() => navigation.navigate('Signup')}>
+          <View style={styles.userContainerButtonLow}>
+            <Text style={styles.userTextButtonLow}>Submit</Text>
+          </View>
+        </Pressable>
       </View>
     </View>
   );
@@ -126,13 +135,46 @@ const styles = StyleSheet.create({
   },
   input: {
     borderColor: 'gray',
-    width: '100%',
+    width: 350,
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
+    borderRadius: 15,
+    padding: 20,
+    margin: 15,
   },
   error: {
+    margin: 10,
     color: 'red',
     fontWeight: 'bold',
+  },
+  userContainerButton: {
+    backgroundColor: '#6DA10B',
+    width: 350,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'stretch',
+    padding: 20,
+    margin: 15,
+    borderRadius: 15,
+  },
+  userTextButton: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  userContainerButtonLow: {
+    backgroundColor: 'lightgrey',
+    width: 350,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'stretch',
+    padding: 20,
+    margin: 15,
+    borderRadius: 15,
+  },
+  userTextButtonLow: {
+    color: 'darkslategrey',
+    fontWeight: 'bold',
+  },
+  plaintext: {
+    marginTop: 15,
   },
 });

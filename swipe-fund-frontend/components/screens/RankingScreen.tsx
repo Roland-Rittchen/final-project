@@ -15,61 +15,71 @@ const userQuery = gql`
 `;
 
 type User = {
+  __typename: string;
   id: number;
   username: string;
   userlevel: number;
   accountVal: number;
 };
 
+export function getStars(num: number) {
+  if (num === 1) {
+    return '⭐';
+  } else if (num === 2) {
+    return '⭐ ⭐';
+  } else if (num === 3) {
+    return '⭐ ⭐ ⭐';
+  } else {
+    return '';
+  }
+}
+
 export default function Ranking() {
   const { data } = useQuery(userQuery);
   const [userList, setUserList] = useState<User[] | undefined>();
   useEffect(() => {
     if (data) {
-      const users = data.getAllUsers.sort(function (a: User, b: User) {
-        if (a.accountVal < b.accountVal) {
-          return -1;
-        }
+      const users = [...data.getAllUsers];
+      function compareValues(a: User, b: User) {
         if (a.accountVal > b.accountVal) {
+          return -1;
+        } else if (a.accountVal < b.accountVal) {
           return 1;
+        } else {
+          // account Value must be equal
+          return 0;
         }
-
-        // names must be equal
-        return 0;
-      });
-      if (users.length > 5) {
-        users.slice(0, 5);
       }
-
-      setUserList(users);
+      users.sort(compareValues);
+      // console.log(JSON.stringify(users));
+      setUserList(users.slice(0, 5));
     }
   }, [data]);
-
-  function getStars(num: number) {
-    if (num === 1) {
-      return '⭐';
-    } else if (num === 2) {
-      return '⭐⭐';
-    } else if (num === 3) {
-      return '⭐⭐⭐';
-    } else {
-      return '';
-    }
-  }
 
   return (
     <View style={styles.container}>
       <StatusBar />
       <View style={styles.container}>
-        <Text>Ranking:</Text>
+        <View style={styles.headContainer}>
+          <Text style={styles.rankContainerText}>Rank</Text>
+          <Text style={styles.rankContainerText}>User</Text>
+          <Text style={styles.rankContainerText}>Level</Text>
+          <Text style={styles.rankContainerText}>Value</Text>
+        </View>
         {userList
           ? userList.map((userItem, index) => {
               return (
                 <View key={userItem.id} style={styles.rankContainer}>
-                  <Text>{index + 1}</Text>
-                  <Text>{userItem.username}</Text>
-                  <Text>{getStars(userItem.userlevel)}</Text>
-                  <Text>{userItem.accountVal}</Text>
+                  <Text style={styles.rankContainerText}>{index + 1}</Text>
+                  <Text style={styles.rankContainerText}>
+                    {userItem.username}
+                  </Text>
+                  <Text style={styles.rankContainerText}>
+                    {getStars(userItem.userlevel)}
+                  </Text>
+                  <Text style={styles.rankContainerText}>
+                    {userItem.accountVal}
+                  </Text>
                 </View>
               );
             })
@@ -93,7 +103,24 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
   },
+  headContainer: {
+    flexDirection: 'row',
+    paddingLeft: 20,
+    paddingRight: 20,
+    marginLeft: 15,
+    marginRight: 15,
+  },
   rankContainer: {
     flexDirection: 'row',
+    padding: 20,
+    margin: 15,
+    borderWidth: 1,
+    borderRadius: 15,
+    borderColor: 'grey',
+  },
+  rankContainerText: {
+    flex: 1,
+
+    fontWeight: 'bold',
   },
 });

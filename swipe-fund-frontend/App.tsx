@@ -15,7 +15,6 @@ import Daily from './components/screens/DailyScreen';
 import Demo from './components/screens/DemoScreen';
 import HomeScreen from './components/screens/HomeScreen';
 import Login from './components/screens/LoginScreen';
-import Logout from './components/screens/LogoutScreen';
 import Ranking from './components/screens/RankingScreen';
 import Signup from './components/screens/SignupScreen';
 import User from './components/screens/UserScreen';
@@ -101,7 +100,6 @@ export default function App() {
                 <drawer.Screen name="Ranking" component={Ranking} />
                 {/* <DrawerItem label="Logout" onPress={() => logout()} /> */}
                 <drawer.Screen name="Demo" component={Demo} />
-                <drawer.Screen name="Logout" component={Logout} />
               </drawer.Group>
             ) : (
               // Auth screens for NOT logged in users
