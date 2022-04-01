@@ -110,17 +110,17 @@ export default function Signup({ navigation }: Props) {
                 userlevel: tmpUser.data.createUser.user.userlevel,
                 sessionId: tmpUser.data.createUser.user.sessionId,
               });
+              const tmpError = tmpUser.data.createUser.error;
               setErrorMsg(tmpUser.data.createUser.error);
+              if (tmpError === '') {
+                // console.log('error msg empty');
+                setName('');
+                setPassword('');
+                navigation.navigate('Home');
+              }
             }
           })
           .catch((er) => console.log('Error creating the user: ' + er));
-
-        if (errorMsg === '') {
-          // console.log('error msg empty');
-          setName('');
-          setPassword('');
-          navigation.navigate('Home');
-        }
       } catch (err) {
         console.log('Error creating the user: ' + err);
         reset();

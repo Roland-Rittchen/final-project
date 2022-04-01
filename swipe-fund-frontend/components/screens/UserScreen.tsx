@@ -25,31 +25,45 @@ export default function User({ navigation }: UserscreenProps) {
   return (
     <View style={styles.container}>
       <StatusBar />
-      <View style={styles.container}>
-        <View style={styles.userContainer}>
-          <Text style={styles.userText}>Username: {user.username}</Text>
-        </View>
-        <View style={styles.userContainer}>
-          <Text style={styles.userText}>
-            Userlevel: {getStars(user.userlevel)}
-          </Text>
-        </View>
-        <View style={styles.userContainer}>
-          <Text style={styles.userText}>Account Value: {user.accountVal}</Text>
-        </View>
-        <Pressable
-          onPress={async (e) => {
-            e.preventDefault();
-            await logoutUser();
-            setUser(undefined);
-            navigation.navigate('Home');
-          }}
-        >
-          <View style={styles.userContainerButton}>
-            <Text style={styles.userTextButton}>LOGOUT</Text>
+      {user ? (
+        <View style={styles.container}>
+          <View style={styles.userContainer}>
+            <Text style={styles.userText}>Username: {user.username}</Text>
           </View>
-        </Pressable>
-      </View>
+          <View style={styles.userContainer}>
+            <Text style={styles.userText}>
+              Userlevel: {getStars(user.userlevel)}
+            </Text>
+          </View>
+          <View style={styles.userContainer}>
+            <Text style={styles.userText}>
+              Account Value: {user.accountVal.toFixed(2)}
+            </Text>
+          </View>
+          <Pressable
+            onPress={async (e) => {
+              e.preventDefault();
+              await logoutUser();
+              setUser(undefined);
+              navigation.navigate('Home');
+            }}
+          >
+            <View style={styles.userContainerButton}>
+              <Text style={styles.userTextButton}>Logout</Text>
+            </View>
+          </Pressable>
+        </View>
+      ) : (
+        <View style={styles.container}>
+          <Text>Error - User not logged in.</Text>
+          <Text>Please sign in.</Text>
+          <Pressable onPress={() => navigation.navigate('Login')}>
+            <View style={styles.userContainerButton}>
+              <Text style={styles.userTextButton}>Logout</Text>
+            </View>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }

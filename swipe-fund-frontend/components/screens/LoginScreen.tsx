@@ -73,11 +73,11 @@ export default function Login({ navigation }: LoginscreenProps) {
 
         // console.log('USER: ' + JSON.stringify(user));
       }
-
+      const tmpError = tmpUser.data.logUserIn.error;
       setErrorMsg(tmpUser.data.logUserIn.error);
       // console.log('reset und route');
-      if (errorMsg === '') {
-        console.log(errorMsg);
+      if (tmpError === '') {
+        console.log(tmpError);
         setName('');
         setPassword('');
         navigation.navigate('Home');
@@ -110,7 +110,7 @@ export default function Login({ navigation }: LoginscreenProps) {
         <Text style={styles.error}>{errorMsg}</Text>
         <Pressable onPress={(e) => submitLogin(e)}>
           <View style={styles.userContainerButton}>
-            <Text style={styles.userTextButton}>Submit</Text>
+            <Text style={styles.userTextButton}>Login</Text>
           </View>
         </Pressable>
         <Text style={styles.plaintext}>
@@ -118,7 +118,7 @@ export default function Login({ navigation }: LoginscreenProps) {
         </Text>
         <Pressable onPress={() => navigation.navigate('Signup')}>
           <View style={styles.userContainerButtonLow}>
-            <Text style={styles.userTextButtonLow}>Submit</Text>
+            <Text style={styles.userTextButtonLow}>Signup</Text>
           </View>
         </Pressable>
       </View>

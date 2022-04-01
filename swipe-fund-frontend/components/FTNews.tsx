@@ -48,16 +48,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  input: {
-    borderColor: 'gray',
-    width: '100%',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-  },
-  chartcontainer: {
-    flexDirection: 'row',
-  },
   newsItemContainer: {
     flexDirection: 'row',
     marginTop: 10,
@@ -66,6 +56,7 @@ const styles = StyleSheet.create({
   newsItemImageContainer: {
     flex: 1,
     marginTop: 15,
+    marginRight: 10,
     padding: 3,
   },
   newsItemNewsContainer: {

@@ -90,6 +90,17 @@ export default function App() {
           <drawer.Navigator
             useLegacyImplementation={true}
             initialRouteName="Home"
+            screenOptions={{
+              drawerActiveTintColor: '#fff',
+              drawerActiveBackgroundColor: '#416006',
+              drawerStyle: {
+                backgroundColor: '#6DA10B',
+                width: 240,
+              },
+              headerStyle: {
+                backgroundColor: '#6DA10B',
+              },
+            }}
           >
             {user ? (
               // Screens for logged in users
