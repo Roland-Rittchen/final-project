@@ -1,5 +1,3 @@
-import bcrypt from 'bcrypt';
-
 const sampleUsers = [
   {
     username: 'Antje',
@@ -39,14 +37,20 @@ const sampleUsers = [
   },
 ];
 
+async function loadMyModule(pw) {
+  const bcrypt = await import('bcrypt');
+  const passwordHash = await bcrypt.hash(pw, 12);
+  return passwordHash;
+}
+
 exports.up = async (sql) => {
   // <insert magic here>
-  console.lot('Populate Users Table');
+  console.log('Populate Users Table');
   for (let i = 0; i < sampleUsers.length; i++) {
-    const passwordHash = await bcrypt.hash(sampleUsers[i].password, 12);
+    const passHash = await loadMyModule(sampleUsers[i].password);
     await sql`
 			INSERT INTO users (username, userlevel, account_val, password_hash)
-			VALUES (${sampleUsers[i].username}, ${sampleUsers[i].userlevel}, ${sampleUsers[i].accountVal}, ${passwordHash}) RETURNING id;`;
+			VALUES (${sampleUsers[i].username}, ${sampleUsers[i].userlevel}, ${sampleUsers[i].accountVal}, ${passHash}) RETURNING id;`;
   }
 };
 
