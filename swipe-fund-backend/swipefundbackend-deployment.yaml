@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: '2022-04-03T07:07:41+00:00'
+  labels:
+    io.kompose.service: swipefundbackend
+  name: swipefundbackend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: swipefundbackend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert
+        kompose.version: 1.26.1 (a9d05d509)
+      creationTimestamp: '2022-04-03T07:07:41+00:00'
+      labels:
+        io.kompose.service: swipefundbackend
+    spec:
+      containers:
+        - env:
+            - name: PGDATABASE
+              value: swifi
+            - name: PGHOST
+              value: db
+            - name: PGPASSWORD
+              value: swifi
+            - name: PGUSERNAME
+              value: swifi
+          image: swipefund.azurecr.io/swipefundbackend
+          name: swipefundbackend
+          ports:
+            - containerPort: 4000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - mountPath: /src
+              name: swipefundbackend-claim0
+      restartPolicy: Always
+      subdomain: swipefund
+      volumes:
+        - name: swipefundbackend-claim0
+          persistentVolumeClaim:
+            claimName: swipefundbackend-claim0
+status: {}

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: swipefund
+  annotations:
+    kubernetes.io/ingress.class: addon-http-application-routing
+spec:
+  rules:
+    - host: swipefundbackend.8b559f22bb174acb8b39.swedencentral.aksapp.io
+      http:
+        paths:
+          - backend:
+              service:
+                name: swipefundbackend
+                port:
+                  number: 4000
+            path: /
+            pathType: ImplementationSpecific
+  defaultBackend:
+    service:
+      name: swipefundbackend
+      port:
+        number: 4000

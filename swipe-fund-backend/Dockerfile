@@ -19,7 +19,10 @@ RUN npm install
 COPY --chown=node:node . .
 RUN npm run build
 
-# RUN npm run migrate up
+# 3 migrations
+#RUN npm run migrate up
+#RUN npm run migrate up
+#RUN npm run migrate up
 
 EXPOSE 4000
 CMD [ "node", "build/index.js" ]

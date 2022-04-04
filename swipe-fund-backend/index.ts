@@ -250,6 +250,7 @@ export const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const apolloServer = new ApolloServer({
   schema,
+  introspection: true,
   // Return response to allow setting cookies in resolvers
   context({ res, req }) {
     return {

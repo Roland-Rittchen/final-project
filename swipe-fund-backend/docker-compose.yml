@@ -3,7 +3,7 @@ version: '3.4'
 services:
   db:
     image: postgres
-    #image: swipefund.azurecr.io/postgres
+    #image: swipefund.azurecr.io/postgres # image for azure
 
     ports:
       - '5432:5432'
@@ -11,10 +11,10 @@ services:
       - POSTGRES_USER=swifi
       - POSTGRES_PASSWORD=swifi
     volumes:
-      #- ./sql/initDb.sql:/docker-entrypoint-initdb.d/initDb.sql
-      - ${WEBAPP_STORAGE_HOME}/site/wwwroot:/var/lib/postgresql/data
+      - ./sql/initDb.sql:/docker-entrypoint-initdb.d/initDb.sql
+      #- ${WEBAPP_STORAGE_HOME}/site/wwwroot:/var/lib/postgresql/data #storage option for azure
     #networks:
-    #- consumer-producer
+    #  - consumer-producer
   swipefundbackend:
     image: swipefund.azurecr.io/swipefundbackend
     domainname: 'swipefund'
@@ -29,21 +29,23 @@ services:
       PGPASSWORD: swifi
     ports:
       - '4000:4000'
-    #volumes:
-    #  - './:/src'
+    volumes:
+      - './:/src'
     #networks:
-    #- consumer-producer
+    #  - consumer-producer
     depends_on:
       - db
     links:
       - db
 #networks:
-#consumer-producer:
-#driver: bridge
+#  consumer-producer:
+#    driver: bridge
 volumes:
   db:
-    #driver: bridge
-    driver: azure_file
-    driver_opts:
-      share_name: swipefund
-      storage_account_name: swipefund
+    driver: bridge
+    #driver: azure_file #azure option
+    #driver_opts:       #azure option
+    #share_name: swipefund    #azure option
+    #storage_account_name: swipefund    #azure option
+# buildkit does not support custom networks
+# start with "DOCKER_BUILDKIT=0 docker-compose up -d"

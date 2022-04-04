@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swipefund-backend
+spec:
+  selector:
+    matchLabels:
+      app: swipefund-backend
+  template:
+    metadata:
+      labels:
+        app: swipefund-backend
+    spec:
+      containers:
+        - name: swipefund-backend
+          image: swipefund.azurecr.io/swipefundbackend
+          resources:
+            limits:
+              memory: '128Mi'
+              cpu: '500m'
+          ports:
+            - containerPort: 4000
