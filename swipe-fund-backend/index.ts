@@ -251,6 +251,13 @@ export const schema = makeExecutableSchema({ typeDefs, resolvers });
 const apolloServer = new ApolloServer({
   schema,
   introspection: true,
+  cors: {
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: '*',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  },
   // Return response to allow setting cookies in resolvers
   context({ res, req }) {
     return {
