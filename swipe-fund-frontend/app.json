@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "SwipeFund",
-    "slug": "swipe-fund-daytrading",
+    "slug": "swipefund",
+    "owner": "rrittc",
     "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/android-chrome-512x512.png",
